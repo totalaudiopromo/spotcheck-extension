@@ -1,0 +1,43 @@
+{
+  "manifest_version": 2,
+  "name": "Spot Check - Spotify Playlist Validator",
+  "version": "1.0.0",
+  "description": "Instantly validate Spotify playlists. Check followers, track counts, curator legitimacy, and detect bot playlists.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "alarms"
+  ],
+  "optional_permissions": [
+    "https://api.spotify.com/*",
+    "https://open.spotify.com/*",
+    "https://spot-checker.totalaudiopromo.com/*"
+  ],
+  "browser_action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "scripts": ["background/service-worker.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://open.spotify.com/playlist/*"],
+      "js": ["content/spotify-injector.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    "icons/*"
+  ]
+}

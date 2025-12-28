@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=400">
+  <title>Spot Checker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <!-- Circle background -->
+          <circle cx="12" cy="12" r="10" fill="#1DB954"/>
+          <!-- Sound bars (left side) -->
+          <rect x="6" y="11" width="2.5" height="5" rx="1.25" fill="white"/>
+          <rect x="9.5" y="8" width="2.5" height="8" rx="1.25" fill="white"/>
+          <!-- Checkmark (right side) -->
+          <path d="M14 12.5l2 2 3.5-4" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="logo-text">Spot Check</span>
+      </div>
+      <div class="user-tier" id="userTier">
+        <span class="tier-badge free">Free</span>
+      </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="single">Single</button>
+      <button class="tab" data-tab="bulk">
+        Bulk
+        <span class="premium-badge" title="Premium feature">PRO</span>
+      </button>
+      <button class="tab" data-tab="history">
+        History
+        <span class="premium-badge" title="Premium feature">PRO</span>
+      </button>
+    </nav>
+
+    <!-- Single Check Tab -->
+    <div class="tab-content active" id="tab-single">
+      <div class="input-group">
+        <input
+          type="text"
+          id="playlistUrl"
+          placeholder="Paste Spotify playlist URL..."
+          autocomplete="off"
+        >
+        <button class="btn-check" id="checkBtn">
+          <span class="btn-text">Check</span>
+          <span class="btn-loading hidden">
+            <svg class="spinner" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="60" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+
+      <!-- Usage Counter (Free tier) -->
+      <div class="usage-counter" id="usageCounter">
+        <span class="usage-text"><span id="checksUsed">0</span>/5 checks today</span>
+        <div class="usage-bar">
+          <div class="usage-fill" id="usageFill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="results hidden" id="results">
+        <div class="result-card">
+          <!-- Playlist Header -->
+          <div class="playlist-header">
+            <img class="playlist-image" id="playlistImage" src="" alt="">
+            <div class="playlist-info">
+              <h2 class="playlist-name" id="playlistName">-</h2>
+              <a class="curator-link" id="curatorLink" href="#" target="_blank">
+                <span id="curatorName">-</span>
+              </a>
+            </div>
+            <div class="status-badge" id="statusBadge">
+              <span class="status-dot"></span>
+              <span class="status-text">Active</span>
+            </div>
+          </div>
+
+          <!-- Metrics Grid -->
+          <div class="metrics-grid">
+            <div class="metric">
+              <span class="metric-value" id="followers">-</span>
+              <span class="metric-label">Followers</span>
+              <span class="metric-trend hidden" id="followerTrend">
+                <svg class="trend-icon up" viewBox="0 0 16 16"><path d="M8 4l4 4H4z"/></svg>
+                <span class="trend-value">+0%</span>
+              </span>
+            </div>
+            <div class="metric">
+              <span class="metric-value" id="tracks">-</span>
+              <span class="metric-label">Tracks</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value" id="lastUpdated">-</span>
+              <span class="metric-label">Last Updated</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value" id="visibility">-</span>
+              <span class="metric-label">Visibility</span>
+            </div>
+          </div>
+
+          <!-- Bot Score (Premium) -->
+          <div class="bot-score-section premium-only" id="botScoreSection">
+            <div class="bot-score-header">
+              <span class="bot-score-label">Bot Risk Score</span>
+              <span class="bot-score-value" id="botScore">-</span>
+            </div>
+            <div class="bot-score-bar">
+              <div class="bot-score-fill" id="botScoreFill" style="width: 0%"></div>
+            </div>
+            <div class="bot-score-factors" id="botScoreFactors">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="result-actions">
+            <button class="btn-secondary" id="openPlaylistBtn">
+              <svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M8.5 1.5a.5.5 0 0 0-1 0v5h-5a.5.5 0 0 0 0 1h5v5a.5.5 0 0 0 1 0v-5h5a.5.5 0 0 0 0-1h-5v-5z"/></svg>
+              Open
+            </button>
+            <button class="btn-secondary premium-only" id="trackPlaylistBtn">
+              <svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
+              Track
+            </button>
+            <button class="btn-secondary premium-only" id="exportBtn">
+              <svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M8 1a.5.5 0 0 1 .5.5v9.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 11.293V1.5A.5.5 0 0 1 8 1z"/><path fill="currentColor" d="M2 14.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
+              Export
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div class="error-state hidden" id="errorState">
+        <svg class="error-icon" viewBox="0 0 24 24" width="48" height="48">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="#ef4444" stroke-width="2"/>
+          <path d="M12 8v4M12 16h.01" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <p class="error-title" id="errorTitle">Playlist not found</p>
+        <p class="error-message" id="errorMessage">This playlist may be private or no longer exists.</p>
+      </div>
+    </div>
+
+    <!-- Bulk Check Tab -->
+    <div class="tab-content" id="tab-bulk">
+      <div class="premium-gate" id="bulkPremiumGate">
+        <svg class="lock-icon" viewBox="0 0 24 24" width="32" height="32">
+          <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 11V7a4 4 0 1 1 8 0v4" fill="none" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <h3>Bulk Checking</h3>
+        <p>Check up to 50 playlists at once. Export results to CSV.</p>
+        <button class="btn-upgrade" id="upgradeBulkBtn">Upgrade to Premium</button>
+      </div>
+
+      <div class="bulk-content hidden" id="bulkContent">
+        <textarea
+          id="bulkUrls"
+          placeholder="Paste playlist URLs (one per line)..."
+          rows="6"
+        ></textarea>
+        <div class="bulk-info">
+          <span id="bulkCount">0</span>/50 playlists
+        </div>
+        <button class="btn-check full-width" id="bulkCheckBtn">
+          <span class="btn-text">Check All</span>
+          <span class="btn-loading hidden">
+            <svg class="spinner" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="60" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+
+        <!-- Bulk Progress -->
+        <div class="bulk-progress hidden" id="bulkProgress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="bulkProgressFill"></div>
+          </div>
+          <span class="progress-text" id="bulkProgressText">0/0 checked</span>
+        </div>
+
+        <!-- Bulk Results Table -->
+        <div class="bulk-results hidden" id="bulkResults">
+          <div class="bulk-results-header">
+            <h3>Results</h3>
+            <button class="btn-secondary" id="exportBulkBtn">
+              <svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M8 1a.5.5 0 0 1 .5.5v9.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 11.293V1.5A.5.5 0 0 1 8 1z"/><path fill="currentColor" d="M2 14.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
+              Export CSV
+            </button>
+          </div>
+          <div class="results-table-wrapper">
+            <table class="results-table" id="bulkResultsTable">
+              <thead>
+                <tr>
+                  <th>Playlist</th>
+                  <th>Followers</th>
+                  <th>Tracks</th>
+                  <th>Risk</th>
+                </tr>
+              </thead>
+              <tbody id="bulkResultsBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div class="tab-content" id="tab-history">
+      <div class="premium-gate" id="historyPremiumGate">
+        <svg class="lock-icon" viewBox="0 0 24 24" width="32" height="32">
+          <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 11V7a4 4 0 1 1 8 0v4" fill="none" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <h3>Historical Tracking</h3>
+        <p>Track playlist follower changes over time. Get alerts for suspicious growth.</p>
+        <button class="btn-upgrade" id="upgradeHistoryBtn">Upgrade to Premium</button>
+      </div>
+
+      <div class="history-content hidden" id="historyContent">
+        <div class="tracked-playlists" id="trackedPlaylists">
+          <!-- Populated by JS -->
+        </div>
+        <div class="empty-state" id="historyEmpty">
+          <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" fill="none">
+            <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+            <path d="M12 6v6l4 2" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <p>No playlists tracked yet</p>
+          <p class="text-muted">Check a playlist and click "Track" to monitor it</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <a href="#" class="footer-link" id="settingsLink">Settings</a>
+      <span class="footer-divider">·</span>
+      <a href="https://totalaudiopromo.com/spot-checker" class="footer-link" target="_blank">Help</a>
+      <span class="footer-divider">·</span>
+      <a href="#" class="footer-link upgrade-link" id="upgradeLink">Upgrade</a>
+    </footer>
+  </div>
+
+  <!-- Upgrade Modal -->
+  <div class="modal hidden" id="upgradeModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="closeModal">&times;</button>
+      <h2>Upgrade to Premium</h2>
+      <p class="modal-subtitle">Unlock powerful playlist validation features</p>
+
+      <div class="pricing-cards">
+        <div class="pricing-card">
+          <h3>Premium</h3>
+          <div class="price">£4.99<span>/month</span></div>
+          <ul class="features-list">
+            <li>Unlimited checks</li>
+            <li>Bulk validation (50 at once)</li>
+            <li>Historical tracking</li>
+            <li>CSV/JSON export</li>
+            <li>Bot detection score</li>
+          </ul>
+          <button class="btn-upgrade" data-plan="premium">Choose Premium</button>
+        </div>
+        <div class="pricing-card featured">
+          <div class="popular-badge">Most Popular</div>
+          <h3>Pro</h3>
+          <div class="price">£14.99<span>/month</span></div>
+          <ul class="features-list">
+            <li>Everything in Premium</li>
+            <li>API access (100 req/day)</li>
+            <li>Webhook alerts</li>
+            <li>Priority support</li>
+          </ul>
+          <button class="btn-upgrade" data-plan="pro">Choose Pro</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal hidden" id="settingsModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="closeSettingsModal">&times;</button>
+      <h2>Settings</h2>
+
+      <div class="settings-section">
+        <h4>Account</h4>
+        <div class="setting-row">
+          <span>Email</span>
+          <span id="accountEmail">Not signed in</span>
+        </div>
+        <div class="setting-row">
+          <span>Plan</span>
+          <span id="accountPlan">Free</span>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>Preferences</h4>
+        <div class="setting-row">
+          <label for="autoCheck">Auto-check on Spotify pages</label>
+          <input type="checkbox" id="autoCheck" checked>
+        </div>
+        <div class="setting-row">
+          <label for="showBadge">Show validation badge</label>
+          <input type="checkbox" id="showBadge" checked>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>Data</h4>
+        <button class="btn-secondary" id="clearDataBtn">Clear local data</button>
+      </div>
+
+      <div class="settings-section" id="dangerZone">
+        <h4>Account</h4>
+        <button class="btn-danger" id="signOutBtn">Sign out</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
