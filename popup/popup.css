@@ -1487,3 +1487,28 @@ textarea:focus-visible {
   opacity: 1;
   transform: translateX(-50%) scale(1);
 }
+
+/* Data Notice - Prominent disclosure */
+.data-notice {
+  background: var(--bg-tertiary);
+  border-top: 1px solid var(--border-color);
+  padding: 10px 16px;
+  margin-top: auto;
+}
+
+.data-notice p {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.data-notice a {
+  color: var(--spotify-green);
+  text-decoration: none;
+}
+
+.data-notice a:hover {
+  text-decoration: underline;
+}
