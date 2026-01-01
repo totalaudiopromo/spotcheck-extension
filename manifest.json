@@ -27,8 +27,7 @@
   "content_scripts": [
     {
       "matches": ["https://open.spotify.com/playlist/*"],
-      "js": ["content/spotify-injector.js"],
-      "css": ["content/spotify-injector.css"]
+      "js": ["content/spotify-injector.js"]
     }
   ],
   "icons": {
