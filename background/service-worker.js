@@ -85,6 +85,8 @@ async function handleDailyReset() {
   await browserAPI.storage.local.set({
     dailyUsage: 0,
     usageDate: new Date().toDateString(),
+    apiDailyUsage: 0,
+    apiUsageDate: new Date().toDateString(),
   });
   console.log('Daily usage reset');
 }
