@@ -20,7 +20,7 @@
   "author": "Total Audio Promo",
   "license": "UNLICENSED",
   "devDependencies": {
-    "eslint": "^8.57.0",
+    "eslint": "^9.39.2",
     "puppeteer": "^24.34.0"
   }
 }
