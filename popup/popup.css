@@ -132,6 +132,15 @@ body {
   background: var(--bg-tertiary);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
+  text-transform: none;
+  letter-spacing: 0.4px;
+  font-size: 11px;
+}
+
+.tier-badge.free.danger {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.08);
 }
 
 .tier-badge.premium {
@@ -810,6 +819,46 @@ body {
   background: rgba(241, 94, 108, 0.1);
   color: var(--error-red);
   border-color: rgba(241, 94, 108, 0.3);
+}
+
+.bot-factor.locked {
+  opacity: 0.65;
+  cursor: help;
+}
+
+/* Inline upgrade nudge in the bot-factor row -- only shown on free tier when
+   factors are paywalled. */
+.bot-factor-upgrade {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--premium-gold) 0%, #f97316 100%);
+  color: #000;
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bot-factor-upgrade:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.25);
+}
+
+/* Make sure free tier sees the bot-score section even though .premium-only
+   normally hides it. The teaser logic in popup.js drives the contents. */
+body.free .bot-score-section.premium-only {
+  display: block !important;
+}
+
+body.free .bot-score-section .bot-score-header::after {
+  content: 'preview';
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--premium-gold);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-left: 8px;
 }
 
 /* Result Actions */

@@ -361,10 +361,10 @@ function showResultsPopover(playlist, botData) {
   footer.className = 'spot-checker-popover-footer';
 
   const branding = document.createElement('a');
-  branding.href = 'https://spot-checker.totalaudiopromo.com';
+  branding.href = 'https://spotcheck.cc';
   branding.target = '_blank';
   branding.className = 'spot-checker-branding';
-  branding.textContent = 'Powered by Spot Checker';
+  branding.textContent = 'Powered by Spot Check';
   footer.appendChild(branding);
 
   popover.appendChild(footer);

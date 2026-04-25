@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "Spot Check - Spotify Playlist Validator",
-  "version": "1.0.0",
+  "name": "Spot Check - Playlist Validator",
+  "version": "1.0.1",
   "description": "Instantly validate Spotify playlists. Check followers, track counts, curator legitimacy, and detect bot playlists.",
   "permissions": [
     "storage",
@@ -11,7 +11,7 @@
   "optional_permissions": [
     "https://api.spotify.com/*",
     "https://open.spotify.com/*",
-    "https://spot-checker.totalaudiopromo.com/*"
+    "https://api.spotcheck.cc/*"
   ],
   "browser_action": {
     "default_popup": "popup/popup.html",

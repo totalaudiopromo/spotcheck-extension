@@ -235,16 +235,14 @@ async function handleSingleCheck() {
       await updateUsageUI();
     }
 
-    // Calculate bot score (premium feature)
-    let botData = null;
-    if (tier !== 'free') {
-      botData = await calculateBotScore(playlist);
-    }
+    // Bot score is calculated for everyone -- free tier sees the headline
+    // score + first factor as a teaser, rest is paywalled in displayBotScore.
+    const botData = await calculateBotScore(playlist);
 
     // Check for historical data
     const history = await Storage.getPlaylistHistory(playlistId);
 
-    displayResults(playlist, botData, history);
+    displayResults(playlist, botData, history, tier);
   } catch (error) {
     console.error('Check failed:', error);
     if (error.status === 404) {
@@ -270,7 +268,7 @@ function handlePaste(e) {
 }
 
 // Display results
-function displayResults(playlist, botData, history) {
+function displayResults(playlist, botData, history, tier = 'free') {
   elements.results.classList.remove('hidden');
   elements.errorState.classList.add('hidden');
 
@@ -311,15 +309,23 @@ function displayResults(playlist, botData, history) {
     elements.followerTrend.classList.add('hidden');
   }
 
-  // Bot score (premium)
+  // Bot score: free sees a teaser, premium sees the full breakdown.
   if (botData) {
-    displayBotScore(botData);
+    displayBotScore(botData, tier);
   }
 }
 
-// Display bot score
-function displayBotScore(botData) {
+// Display bot score. Free tier sees the headline % + the first factor as a
+// taste, the rest are masked behind an Upgrade nudge so the value is visible
+// at peak intent.
+function displayBotScore(botData, tier = 'free') {
   const { score, level, factors } = botData;
+  const isFree = tier === 'free';
+
+  // Make sure the section is visible even on free -- it's gated by .premium-only
+  // CSS via body.free, so we override here.
+  elements.botScoreSection.classList.remove('hidden');
+  elements.botScoreSection.style.display = 'block';
 
   setText(elements.botScore, `${score}%`);
   elements.botScore.className = `bot-score-value ${level}`;
@@ -327,11 +333,28 @@ function displayBotScore(botData) {
   elements.botScoreFill.style.width = `${score}%`;
   elements.botScoreFill.className = `bot-score-fill ${level}`;
 
-  // Display factors using safe DOM methods
   clearChildren(elements.botScoreFactors);
-  factors.forEach(factor => {
-    elements.botScoreFactors.appendChild(createFactorBadge(factor));
-  });
+
+  if (isFree) {
+    const visible = factors.slice(0, 1);
+    const hidden = factors.length - visible.length;
+    visible.forEach(factor => {
+      elements.botScoreFactors.appendChild(createFactorBadge(factor));
+    });
+    if (hidden > 0) {
+      const nudge = document.createElement('button');
+      nudge.className = 'bot-factor-upgrade';
+      nudge.type = 'button';
+      nudge.title = 'Premium unlocks every signal we use to flag suspicious playlists.';
+      nudge.textContent = `\u{1F512} Unlock ${hidden} more signal${hidden === 1 ? '' : 's'} -- £4.99/mo`;
+      nudge.addEventListener('click', () => openCheckout('premium'));
+      elements.botScoreFactors.appendChild(nudge);
+    }
+  } else {
+    factors.forEach(factor => {
+      elements.botScoreFactors.appendChild(createFactorBadge(factor));
+    });
+  }
 }
 
 // Calculate bot score
@@ -346,10 +369,18 @@ async function calculateBotScore(playlist) {
   if (tracks > 0) {
     const ratio = followers / tracks;
     if (ratio < 10) {
-      factors.push({ label: 'Low follower ratio', level: 'warning' });
+      factors.push({
+        label: 'Low follower ratio',
+        level: 'warning',
+        description: 'Fewer than 10 followers per track. Real curated playlists usually have a much higher ratio.',
+      });
       score += 15;
     } else if (ratio > 10000) {
-      factors.push({ label: 'Suspiciously high ratio', level: 'danger' });
+      factors.push({
+        label: 'Suspiciously high ratio',
+        level: 'danger',
+        description: 'Over 10,000 followers per track. Often a sign of inflated numbers from bot networks.',
+      });
       score += 25;
     }
   }
@@ -359,7 +390,11 @@ async function calculateBotScore(playlist) {
   if (snapshotDate) {
     const daysSinceCreation = Math.floor((Date.now() - snapshotDate) / (1000 * 60 * 60 * 24));
     if (daysSinceCreation < 30 && followers > 10000) {
-      factors.push({ label: 'New playlist, high followers', level: 'danger' });
+      factors.push({
+        label: 'New playlist, high followers',
+        level: 'danger',
+        description: 'Less than 30 days old but already over 10,000 followers. Organic growth this fast is rare.',
+      });
       score += 30;
     }
   }
@@ -368,19 +403,31 @@ async function calculateBotScore(playlist) {
   const genericNames = ['chill', 'vibes', 'lofi', 'study', 'sleep', 'workout'];
   const nameLower = playlist.name.toLowerCase();
   if (genericNames.some(n => nameLower.includes(n)) && followers > 50000) {
-    factors.push({ label: 'Generic name pattern', level: 'warning' });
+    factors.push({
+      label: 'Generic name pattern',
+      level: 'warning',
+      description: 'Names like "chill vibes" or "lofi study" are common with bulk bot-driven playlists.',
+    });
     score += 10;
   }
 
   // Factor 4: No description
   if (!playlist.description || playlist.description.length < 10) {
-    factors.push({ label: 'No description', level: 'warning' });
+    factors.push({
+      label: 'No description',
+      level: 'warning',
+      description: 'Real curators usually write a description. Empty descriptions are typical of automated playlists.',
+    });
     score += 10;
   }
 
   // Factor 5: Round follower numbers
   if (followers > 1000 && followers % 1000 === 0) {
-    factors.push({ label: 'Round follower count', level: 'warning' });
+    factors.push({
+      label: 'Round follower count',
+      level: 'warning',
+      description: 'Exact thousands (10,000 / 25,000) often indicate purchased follower packages.',
+    });
     score += 15;
   }
 
@@ -391,7 +438,11 @@ async function calculateBotScore(playlist) {
 
   // Add positive factor if low risk
   if (factors.length === 0) {
-    factors.push({ label: 'No red flags detected', level: '' });
+    factors.push({
+      label: 'No red flags detected',
+      level: '',
+      description: 'None of our automated signals fired. Worth pitching, but always cross-check the curator.',
+    });
   }
 
   return { score: Math.min(score, 100), level, factors };
@@ -625,22 +676,50 @@ async function updateUsageUI() {
 
   if (tier !== 'free') {
     elements.usageCounter.classList.add('hidden');
+    refreshTierBadge(tier);
     return;
   }
 
+  const limits = await Premium.getLimits();
+  const dailyLimit = Number.isFinite(limits.dailyChecks) ? limits.dailyChecks : 2;
   const usage = await Storage.getDailyUsage();
-  setText(elements.checksUsed, String(usage));
+  const remaining = Math.max(0, dailyLimit - usage);
 
-  const percent = (usage / 5) * 100;
-  elements.usageFill.style.width = `${percent}%`;
-  elements.usageFill.classList.toggle('warning', percent >= 60 && percent < 100);
+  setText(elements.checksUsed, String(usage));
+  const limitEl = document.getElementById('checksLimit');
+  if (limitEl) setText(limitEl, String(dailyLimit));
+
+  const percent = (usage / dailyLimit) * 100;
+  elements.usageFill.style.width = `${Math.min(percent, 100)}%`;
+  elements.usageFill.classList.toggle('warning', percent >= 50 && percent < 100);
   elements.usageFill.classList.toggle('danger', percent >= 100);
+
+  refreshTierBadge('free', { remaining, dailyLimit });
+}
+
+// Render the header tier badge. Free tier gets a live "X left" counter so the
+// limit is felt rather than abstract.
+function refreshTierBadge(tier, opts = {}) {
+  const badge = elements.userTier.querySelector('.tier-badge');
+  if (!badge) return;
+  badge.className = `tier-badge ${tier}`;
+  if (tier === 'free') {
+    const { remaining, dailyLimit } = opts;
+    if (remaining === undefined) {
+      setText(badge, 'Free');
+    } else if (remaining <= 0) {
+      setText(badge, 'Free • limit hit');
+      badge.classList.add('danger');
+    } else {
+      setText(badge, `Free • ${remaining}/${dailyLimit} left`);
+    }
+  } else {
+    setText(badge, tier.charAt(0).toUpperCase() + tier.slice(1));
+  }
 }
 
 function updateTierUI(tier) {
-  const badge = elements.userTier.querySelector('.tier-badge');
-  badge.className = `tier-badge ${tier}`;
-  setText(badge, tier.charAt(0).toUpperCase() + tier.slice(1));
+  refreshTierBadge(tier);
 
   document.body.classList.remove('free', 'premium', 'pro');
   document.body.classList.add(tier);
@@ -684,9 +763,7 @@ async function loadSettings() {
 
 // Actions
 function openCheckout(plan) {
-  // Open Stripe checkout
-  const checkoutUrl = `https://spot-checker.totalaudiopromo.com/checkout?plan=${plan}`;
-  browserAPI.tabs.create({ url: checkoutUrl });
+  browserAPI.tabs.create({ url: Premium.getCheckoutUrl(plan) });
 }
 
 async function handleClearData() {

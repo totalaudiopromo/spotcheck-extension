@@ -154,7 +154,7 @@ async function handleSyncTracked() {
     console.log('Tracked playlists synced');
 
     // Sync to cloud
-    await fetch('https://spot-checker.totalaudiopromo.com/api/sync', {
+    await fetch('https://api.spotcheck.cc/api/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -182,7 +182,7 @@ async function verifySubscription() {
 
   try {
     const response = await fetch(
-      'https://spot-checker.totalaudiopromo.com/api/subscription/verify',
+      'https://api.spotcheck.cc/api/subscription/verify',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -211,7 +211,7 @@ async function verifySubscription() {
  */
 async function getAccessToken() {
   try {
-    const response = await fetch('https://spot-checker.totalaudiopromo.com/api/spotify-token', {
+    const response = await fetch('https://api.spotcheck.cc/api/spotify-token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -323,7 +323,7 @@ browserAPI.runtime.onInstalled.addListener(details => {
 
     // Open welcome page
     browserAPI.tabs.create({
-      url: 'https://spot-checker.totalaudiopromo.com/welcome',
+      url: 'https://spotcheck.cc/welcome',
     });
   }
 });
