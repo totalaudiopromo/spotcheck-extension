@@ -6,7 +6,7 @@
   "scripts": {
     "build": "./scripts/build.sh",
     "dev:backend": "next dev -p 3005",
-    "lint": "eslint extension/**/*.js",
+    "lint": "eslint background content lib popup",
     "clean": "rm -rf dist"
   },
   "keywords": [
