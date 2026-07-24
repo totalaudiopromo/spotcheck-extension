@@ -23,6 +23,34 @@ import {
 // Cross-browser API compatibility
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
+// Fire-and-forget analytics beacon. Extension checks run client-side, so these
+// funnel steps aren't recorded anywhere else. A persisted anon_id links a user's
+// events before they sign in. Never throws, never blocks the popup.
+async function beacon(action, meta = {}) {
+  try {
+    let anonId = await Storage.get('anonId', null);
+    if (!anonId) {
+      anonId =
+        (typeof crypto !== 'undefined' && crypto.randomUUID && crypto.randomUUID()) ||
+        `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      await Storage.set('anonId', anonId);
+    }
+    const email = await Premium.getEmail();
+    await fetch('https://api.spotcheck.cc/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action,
+        anon_id: anonId,
+        email: email || null,
+        meta: { ...meta, source: 'extension' },
+      }),
+    });
+  } catch (_) {
+    // analytics must never break the popup
+  }
+}
+
 // DOM Elements
 const elements = {
   // Tabs
@@ -96,6 +124,8 @@ let bulkResults = [];
 
 // Initialise
 async function init() {
+  beacon('extension_opened');
+
   // Load user tier
   const tier = await Premium.getTier();
   updateTierUI(tier);
@@ -215,7 +245,9 @@ async function handleSingleCheck() {
   const tier = await Premium.getTier();
   if (tier === 'free') {
     const usage = await Storage.getDailyUsage();
-    if (usage >= 5) {
+    const limits = await Premium.getLimits();
+    if (usage >= limits.dailyChecks) {
+      beacon('limit_hit');
       showUpgradeModal();
       return;
     }
@@ -243,6 +275,7 @@ async function handleSingleCheck() {
     const history = await Storage.getPlaylistHistory(playlistId);
 
     displayResults(playlist, botData, history, tier);
+    beacon('check', { risk: botData && botData.level });
   } catch (error) {
     console.error('Check failed:', error);
     if (error.status === 404) {
@@ -681,7 +714,7 @@ async function updateUsageUI() {
   }
 
   const limits = await Premium.getLimits();
-  const dailyLimit = Number.isFinite(limits.dailyChecks) ? limits.dailyChecks : 2;
+  const dailyLimit = Number.isFinite(limits.dailyChecks) ? limits.dailyChecks : 1;
   const usage = await Storage.getDailyUsage();
   const remaining = Math.max(0, dailyLimit - usage);
 
@@ -737,6 +770,7 @@ function updateTierUI(tier) {
 
 // Modals
 function showUpgradeModal() {
+  beacon('upgrade_shown');
   elements.upgradeModal.classList.remove('hidden');
 }
 
@@ -763,6 +797,7 @@ async function loadSettings() {
 
 // Actions
 function openCheckout(plan) {
+  beacon('checkout_started', { plan });
   browserAPI.tabs.create({ url: Premium.getCheckoutUrl(plan) });
 }
 

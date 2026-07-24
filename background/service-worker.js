@@ -305,7 +305,7 @@ async function handlePaymentSuccess(data) {
 /**
  * Handle extension install/update
  */
-browserAPI.runtime.onInstalled.addListener(details => {
+browserAPI.runtime.onInstalled.addListener(async details => {
   console.log('Extension installed/updated:', details.reason);
 
   if (details.reason === 'install') {
@@ -320,6 +320,26 @@ browserAPI.runtime.onInstalled.addListener(details => {
         showBadge: true,
       },
     });
+
+    // Record the install for the conversion funnel. Self-contained (the worker
+    // doesn't share the popup's beacon helper); best-effort, never throws.
+    try {
+      const stored = await browserAPI.storage.local.get('anonId');
+      let anonId = stored && stored.anonId;
+      if (!anonId) {
+        anonId =
+          (typeof crypto !== 'undefined' && crypto.randomUUID && crypto.randomUUID()) ||
+          `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        await browserAPI.storage.local.set({ anonId });
+      }
+      await fetch('https://api.spotcheck.cc/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'install', anon_id: anonId, meta: { source: 'extension' } }),
+      });
+    } catch (_) {
+      // analytics must never break install
+    }
 
     // Open welcome page
     browserAPI.tabs.create({
