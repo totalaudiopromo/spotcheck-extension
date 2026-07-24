@@ -363,8 +363,36 @@ function displayBotScore(botData, tier = 'free') {
   setText(elements.botScore, `${score}%`);
   elements.botScore.className = `bot-score-value ${level}`;
 
-  elements.botScoreFill.style.width = `${score}%`;
-  elements.botScoreFill.className = `bot-score-fill ${level}`;
+  if (elements.botScoreFill) {
+    elements.botScoreFill.style.width = `${score}%`;
+    elements.botScoreFill.className = `bot-score-fill ${level}`;
+  }
+
+  // Update Radial Gauge Circle SVG
+  const gaugeCircle = document.getElementById('gaugeCircle');
+  if (gaugeCircle) {
+    const circumference = 2 * Math.PI * 38; // ~238.76
+    const offset = circumference - (circumference * Math.min(Math.max(score, 0), 100)) / 100;
+    gaugeCircle.style.strokeDashoffset = offset;
+    gaugeCircle.className.baseVal = `gauge-fill ${level}`;
+  }
+
+  // Update Risk Pill & Description
+  const riskLevelPill = document.getElementById('riskLevelPill');
+  const riskDescription = document.getElementById('riskDescription');
+  if (riskLevelPill) {
+    const pillText = level === 'high' ? 'High Bot Risk' : level === 'warning' ? 'Moderate Risk' : 'Low Bot Risk';
+    setText(riskLevelPill, pillText);
+    riskLevelPill.className = `risk-pill ${level}`;
+  }
+  if (riskDescription) {
+    const descText = level === 'high'
+      ? 'High likelihood of bot inflation or inorganic activity.'
+      : level === 'warning'
+      ? 'Potentially suspicious follower ratios or track patterns.'
+      : 'Playlist signals look natural and authentic.';
+    setText(riskDescription, descText);
+  }
 
   clearChildren(elements.botScoreFactors);
 

@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=400">
-  <title>Spot Checker</title>
+  <title>Spot Check — Total Audio Promo</title>
+  <!-- TAP Family Fonts: Space Grotesk (Headings), Inter (UI), JetBrains Mono (Metrics) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -11,16 +15,22 @@
     <!-- Header -->
     <header class="header">
       <div class="logo">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <!-- Circle background -->
-          <circle cx="12" cy="12" r="10" fill="#1DB954"/>
-          <!-- Sound bars (left side) -->
-          <rect x="6" y="11" width="2.5" height="5" rx="1.25" fill="white"/>
-          <rect x="9.5" y="8" width="2.5" height="8" rx="1.25" fill="white"/>
-          <!-- Checkmark (right side) -->
-          <path d="M14 12.5l2 2 3.5-4" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="logo-text">Spot Check</span>
+        <div class="logo-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" fill="url(#logoGradient)"/>
+            <rect x="6.5" y="11" width="2.5" height="5" rx="1.25" fill="#08090C"/>
+            <rect x="10" y="8" width="2.5" height="8" rx="1.25" fill="#08090C"/>
+            <path d="M14.5 12.5l1.8 1.8 3.2-3.8" stroke="#08090C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="logoGradient" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#00F59B"/>
+                <stop offset="1" stop-color="#10B981"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">Spot<span class="logo-accent">Check</span></span>
+        <span class="tap-family-badge">by TAP</span>
       </div>
       <div class="user-tier" id="userTier">
         <span class="tier-badge free">Free</span>
@@ -29,26 +39,32 @@
 
     <!-- Tab Navigation -->
     <nav class="tabs">
-      <button class="tab active" data-tab="single">Single</button>
+      <button class="tab active" data-tab="single">Single Check</button>
       <button class="tab" data-tab="bulk">
         Bulk
-        <span class="premium-badge" title="Premium feature">PRO</span>
+        <span class="premium-badge" title="Pro feature">PRO</span>
       </button>
       <button class="tab" data-tab="history">
         History
-        <span class="premium-badge" title="Premium feature">PRO</span>
+        <span class="premium-badge" title="Pro feature">PRO</span>
       </button>
     </nav>
 
     <!-- Single Check Tab -->
     <div class="tab-content active" id="tab-single">
       <div class="input-group">
-        <input
-          type="text"
-          id="playlistUrl"
-          placeholder="Paste Spotify playlist URL..."
-          autocomplete="off"
-        >
+        <div class="input-wrapper">
+          <svg class="input-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.5 7.5L15 10M15 10L12.5 12.5M15 10H8.75C6.67893 10 5 11.6789 5 13.75V15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <input
+            type="text"
+            id="playlistUrl"
+            placeholder="Paste Spotify playlist URL..."
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
         <button class="btn-check" id="checkBtn">
           <span class="btn-text">Check</span>
           <span class="btn-loading hidden">
@@ -61,7 +77,10 @@
 
       <!-- Usage Counter (Free tier) -->
       <div class="usage-counter" id="usageCounter">
-        <span class="usage-text"><span id="checksUsed">0</span>/<span id="checksLimit">2</span> checks today</span>
+        <div class="usage-header">
+          <span class="usage-label">Daily Free Checks</span>
+          <span class="usage-text"><span id="checksUsed">0</span>/<span id="checksLimit">2</span></span>
+        </div>
         <div class="usage-bar">
           <div class="usage-fill" id="usageFill" style="width: 0%"></div>
         </div>
@@ -69,13 +88,18 @@
 
       <!-- Results -->
       <div class="results hidden" id="results">
-        <div class="result-card">
-          <!-- Playlist Header -->
+        <!-- Playlist Header Card -->
+        <div class="result-card main-card">
           <div class="playlist-header">
-            <img class="playlist-image" id="playlistImage" src="" alt="">
+            <div class="playlist-image-wrapper">
+              <img class="playlist-image" id="playlistImage" src="" alt="Playlist Cover">
+            </div>
             <div class="playlist-info">
               <h2 class="playlist-name" id="playlistName">-</h2>
               <a class="curator-link" id="curatorLink" href="#" target="_blank">
+                <svg class="curator-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M6 1a5 5 0 100 10A5 5 0 006 1zM4.5 4.5a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm1.5 5c-1.38 0-2.58-.7-3.26-1.76.03-1.08 2.17-1.68 3.26-1.68s3.23.6 3.26 1.68C8.58 8.8 7.38 9.5 6 9.5z" fill="currentColor"/>
+                </svg>
                 <span id="curatorName">-</span>
               </a>
             </div>
@@ -85,55 +109,72 @@
             </div>
           </div>
 
-          <!-- Metrics Grid -->
-          <div class="metrics-grid">
-            <div class="metric">
-              <span class="metric-value" id="followers">-</span>
-              <span class="metric-label">Followers</span>
-              <span class="metric-trend hidden" id="followerTrend">
-                <svg class="trend-icon up" viewBox="0 0 16 16"><path d="M8 4l4 4H4z"/></svg>
-                <span class="trend-value">+0%</span>
-              </span>
-            </div>
-            <div class="metric">
-              <span class="metric-value" id="tracks">-</span>
-              <span class="metric-label">Tracks</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value" id="lastUpdated">-</span>
-              <span class="metric-label">Last Updated</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value" id="visibility">-</span>
-              <span class="metric-label">Visibility</span>
-            </div>
-          </div>
-
-          <!-- Bot Score (Premium) -->
+          <!-- Hero Bot Risk Score Gauge Section -->
           <div class="bot-score-section premium-only" id="botScoreSection">
-            <div class="bot-score-header">
-              <span class="bot-score-label">Bot Risk Score</span>
-              <span class="bot-score-value" id="botScore">-</span>
+            <div class="bot-hero-box">
+              <div class="gauge-container">
+                <svg class="gauge-svg" viewBox="0 0 100 100">
+                  <circle class="gauge-bg" cx="50" cy="50" r="38"></circle>
+                  <circle class="gauge-fill" id="gaugeCircle" cx="50" cy="50" r="38"></circle>
+                </svg>
+                <div class="gauge-center">
+                  <span class="bot-score-value" id="botScore">0%</span>
+                  <span class="bot-score-sub">BOT RISK</span>
+                </div>
+              </div>
+              <div class="bot-score-summary">
+                <div class="risk-pill" id="riskLevelPill">Low Risk</div>
+                <p class="risk-description" id="riskDescription">Playlist signals look natural and authentic.</p>
+              </div>
             </div>
-            <div class="bot-score-bar">
+
+            <!-- Legacy fill bar kept for fallback -->
+            <div class="bot-score-bar" style="display:none;">
               <div class="bot-score-fill" id="botScoreFill" style="width: 0%"></div>
             </div>
+
             <div class="bot-score-factors" id="botScoreFactors">
               <!-- Populated by JS -->
             </div>
           </div>
 
+          <!-- 2x2 Metrics Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">Followers</span>
+              <div class="metric-value-row">
+                <span class="metric-value" id="followers">-</span>
+                <span class="metric-trend hidden" id="followerTrend">
+                  <svg class="trend-icon up" viewBox="0 0 16 16"><path d="M8 4l4 4H4z"/></svg>
+                  <span class="trend-value">+0%</span>
+                </span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Tracks</span>
+              <span class="metric-value" id="tracks">-</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Last Updated</span>
+              <span class="metric-value" id="lastUpdated">-</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Visibility</span>
+              <span class="metric-value" id="visibility">-</span>
+            </div>
+          </div>
+
           <!-- Actions -->
           <div class="result-actions">
-            <button class="btn-secondary" id="openPlaylistBtn">
+            <button class="btn-action primary" id="openPlaylistBtn">
               <svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M8.5 1.5a.5.5 0 0 0-1 0v5h-5a.5.5 0 0 0 0 1h5v5a.5.5 0 0 0 1 0v-5h5a.5.5 0 0 0 0-1h-5v-5z"/></svg>
-              Open
+              Open Spotify
             </button>
-            <button class="btn-secondary premium-only" id="trackPlaylistBtn">
+            <button class="btn-action secondary premium-only" id="trackPlaylistBtn">
               <svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
               Track
             </button>
-            <button class="btn-secondary premium-only" id="exportBtn">
+            <button class="btn-action secondary premium-only" id="exportBtn">
               <svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M8 1a.5.5 0 0 1 .5.5v9.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 11.293V1.5A.5.5 0 0 1 8 1z"/><path fill="currentColor" d="M2 14.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
               Export
             </button>
@@ -143,9 +184,9 @@
 
       <!-- Error State -->
       <div class="error-state hidden" id="errorState">
-        <svg class="error-icon" viewBox="0 0 24 24" width="48" height="48">
-          <circle cx="12" cy="12" r="10" fill="none" stroke="#ef4444" stroke-width="2"/>
-          <path d="M12 8v4M12 16h.01" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+        <svg class="error-icon" viewBox="0 0 24 24" width="40" height="40">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="#EF4444" stroke-width="2"/>
+          <path d="M12 8v4M12 16h.01" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
         </svg>
         <p class="error-title" id="errorTitle">Playlist not found</p>
         <p class="error-message" id="errorMessage">This playlist may be private or no longer exists.</p>
@@ -155,26 +196,28 @@
     <!-- Bulk Check Tab -->
     <div class="tab-content" id="tab-bulk">
       <div class="premium-gate" id="bulkPremiumGate">
-        <svg class="lock-icon" viewBox="0 0 24 24" width="32" height="32">
-          <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
-          <path d="M8 11V7a4 4 0 1 1 8 0v4" fill="none" stroke="currentColor" stroke-width="2"/>
-        </svg>
+        <div class="gate-icon-box">
+          <svg class="lock-icon" viewBox="0 0 24 24" width="28" height="28">
+            <rect x="5" y="11" width="14" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 11V7a4 4 0 1 1 8 0v4" fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
         <h3>Bulk Checking</h3>
-        <p>Check up to 50 playlists at once. Export results to CSV.</p>
-        <button class="btn-upgrade" id="upgradeBulkBtn">Upgrade to Premium</button>
+        <p>Check up to 50 playlists at once. Detect fake promoters and export CSV reports in seconds.</p>
+        <button class="btn-upgrade" id="upgradeBulkBtn">Upgrade to Pro</button>
       </div>
 
       <div class="bulk-content hidden" id="bulkContent">
         <textarea
           id="bulkUrls"
-          placeholder="Paste playlist URLs (one per line)..."
-          rows="6"
+          placeholder="Paste Spotify playlist URLs (one per line)..."
+          rows="5"
         ></textarea>
         <div class="bulk-info">
           <span id="bulkCount">0</span>/50 playlists
         </div>
         <button class="btn-check full-width" id="bulkCheckBtn">
-          <span class="btn-text">Check All</span>
+          <span class="btn-text">Check All Playlists</span>
           <span class="btn-loading hidden">
             <svg class="spinner" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="60" stroke-linecap="round"/>
@@ -193,8 +236,8 @@
         <!-- Bulk Results Table -->
         <div class="bulk-results hidden" id="bulkResults">
           <div class="bulk-results-header">
-            <h3>Results</h3>
-            <button class="btn-secondary" id="exportBulkBtn">
+            <h3>Validation Results</h3>
+            <button class="btn-action secondary" id="exportBulkBtn">
               <svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M8 1a.5.5 0 0 1 .5.5v9.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 11.293V1.5A.5.5 0 0 1 8 1z"/><path fill="currentColor" d="M2 14.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
               Export CSV
             </button>
@@ -220,13 +263,15 @@
     <!-- History Tab -->
     <div class="tab-content" id="tab-history">
       <div class="premium-gate" id="historyPremiumGate">
-        <svg class="lock-icon" viewBox="0 0 24 24" width="32" height="32">
-          <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
-          <path d="M8 11V7a4 4 0 1 1 8 0v4" fill="none" stroke="currentColor" stroke-width="2"/>
-        </svg>
+        <div class="gate-icon-box">
+          <svg class="lock-icon" viewBox="0 0 24 24" width="28" height="28">
+            <rect x="5" y="11" width="14" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 11V7a4 4 0 1 1 8 0v4" fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
         <h3>Historical Tracking</h3>
-        <p>Track playlist follower changes over time. Get alerts for suspicious growth.</p>
-        <button class="btn-upgrade" id="upgradeHistoryBtn">Upgrade to Premium</button>
+        <p>Monitor follower spikes, sudden track drops, and bot activity over time.</p>
+        <button class="btn-upgrade" id="upgradeHistoryBtn">Upgrade to Pro</button>
       </div>
 
       <div class="history-content hidden" id="historyContent">
@@ -234,23 +279,20 @@
           <!-- Populated by JS -->
         </div>
         <div class="empty-state" id="historyEmpty">
-          <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" fill="none">
+          <svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" fill="none">
             <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
             <path d="M12 6v6l4 2" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-          <p>No playlists tracked yet</p>
-          <p class="text-muted">Check a playlist and click "Track" to monitor it</p>
+          <p class="empty-title">No playlists tracked yet</p>
+          <p class="empty-sub">Validate a playlist and click "Track" to record growth metrics over time.</p>
         </div>
       </div>
     </div>
 
-    <!-- Data Notice -->
-    <div class="data-notice" id="dataNotice">
-      <p>Your data stays local. We only access public Spotify playlist info to validate playlists. <a href="https://spotcheck.cc/privacy" target="_blank">Privacy Policy</a></p>
-    </div>
-
     <!-- Footer -->
     <footer class="footer">
+      <span class="footer-brand">Total Audio Promo</span>
+      <span class="footer-divider">·</span>
       <a href="#" class="footer-link" id="settingsLink">Settings</a>
       <span class="footer-divider">·</span>
       <a href="https://spotcheck.cc/privacy" class="footer-link" target="_blank">Privacy</a>
@@ -264,33 +306,35 @@
     <div class="modal-backdrop"></div>
     <div class="modal-content">
       <button class="modal-close" id="closeModal">&times;</button>
-      <h2>Upgrade to Premium</h2>
-      <p class="modal-subtitle">Unlock powerful playlist validation features</p>
+      <div class="modal-header">
+        <h2>Elevate Your Playlist Intelligence</h2>
+        <p class="modal-subtitle">Detect bot playlists, track growth trends, and validate promoter claims.</p>
+      </div>
 
       <div class="pricing-cards">
         <div class="pricing-card">
           <h3>Premium</h3>
-          <div class="price">£4.99<span>/month</span></div>
+          <div class="price">£4.99<span>/mo</span></div>
           <ul class="features-list">
-            <li>Unlimited checks</li>
+            <li>Unlimited playlist checks</li>
             <li>Bulk validation (50 at once)</li>
-            <li>Historical tracking</li>
-            <li>CSV/JSON export</li>
-            <li>Bot detection score</li>
+            <li>Historical growth tracking</li>
+            <li>CSV / JSON exports</li>
+            <li>Full Bot Risk Factor breakdown</li>
           </ul>
           <button class="btn-upgrade" data-plan="premium">Choose Premium</button>
         </div>
         <div class="pricing-card featured">
-          <div class="popular-badge">Most Popular</div>
+          <div class="popular-badge">MOST POPULAR</div>
           <h3>Pro</h3>
-          <div class="price">£14.99<span>/month</span></div>
+          <div class="price">£14.99<span>/mo</span></div>
           <ul class="features-list">
             <li>Everything in Premium</li>
-            <li>API access (100 req/day)</li>
-            <li>Webhook alerts</li>
-            <li>Priority support</li>
+            <li>API Access (100 req/day)</li>
+            <li>Webhook change alerts</li>
+            <li>Priority promoter verification</li>
           </ul>
-          <button class="btn-upgrade" data-plan="pro">Choose Pro</button>
+          <button class="btn-upgrade pro" data-plan="pro">Choose Pro</button>
         </div>
       </div>
     </div>
@@ -301,40 +345,40 @@
     <div class="modal-backdrop"></div>
     <div class="modal-content">
       <button class="modal-close" id="closeSettingsModal">&times;</button>
-      <h2>Settings</h2>
+      <h2>Extension Settings</h2>
 
       <div class="settings-section">
         <h4>Account</h4>
         <div class="setting-row">
-          <span>Email</span>
-          <span id="accountEmail">Not signed in</span>
+          <span>Account Email</span>
+          <span id="accountEmail" class="setting-value">Not signed in</span>
         </div>
         <div class="setting-row">
-          <span>Plan</span>
-          <span id="accountPlan">Free</span>
+          <span>Active Plan</span>
+          <span id="accountPlan" class="setting-value badge-free">Free</span>
         </div>
       </div>
 
       <div class="settings-section">
         <h4>Preferences</h4>
         <div class="setting-row">
-          <label for="autoCheck">Auto-check on Spotify pages</label>
+          <label for="autoCheck">Auto-check when viewing Spotify</label>
           <input type="checkbox" id="autoCheck" checked>
         </div>
         <div class="setting-row">
-          <label for="showBadge">Show validation badge</label>
+          <label for="showBadge">Display inline validation badge</label>
           <input type="checkbox" id="showBadge" checked>
         </div>
       </div>
 
       <div class="settings-section">
-        <h4>Data</h4>
-        <button class="btn-secondary" id="clearDataBtn">Clear local data</button>
+        <h4>Storage & Data</h4>
+        <button class="btn-action secondary" id="clearDataBtn">Clear Local Storage</button>
       </div>
 
       <div class="settings-section" id="dangerZone">
-        <h4>Account</h4>
-        <button class="btn-danger" id="signOutBtn">Sign out</button>
+        <h4>Session</h4>
+        <button class="btn-danger" id="signOutBtn">Sign Out</button>
       </div>
     </div>
   </div>
